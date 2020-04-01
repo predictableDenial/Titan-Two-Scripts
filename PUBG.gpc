@@ -1,0 +1,124 @@
+#pragma METAINFO("PUBG", 1, 0, "")
+
+#include <keyboard.gph>
+#include <mouse.gph>
+
+int mapType = "normal";
+bool antiRecoilState = TRUE;
+fix32 verticalMove = 0.0;
+//const fix32 antiRecoilStrength = 2.0
+
+const uint8 keyMap[] = {
+		KEY_X, BUTTON_17,
+		KEY_A, BUTTON_16,
+		KEY_B, BUTTON_15,
+		KEY_L, BUTTON_9,
+		KEY_M, BUTTON_14,
+		KEY_R, BUTTON_6,
+	};
+	
+	const uint8 mouseMap[] = {
+		MOUSE_X, STICK_1_X, 
+        MOUSE_Y, STICK_1_Y, 
+		MBUTTON_1, BUTTON_5,
+		MBUTTON_2, BUTTON_3,
+		MWHEEL_FORWARD, BUTTON_13,
+		MWHEEL_BACKWARD, BUTTON_4,
+	};
+	
+	const uint8 inventoryKeyMap[] = {
+		KEY_X, BUTTON_17,
+		KEY_A, BUTTON_16,
+		KEY_B, BUTTON_15,
+		KEY_L, BUTTON_7,
+		KEY_M, BUTTON_14,
+		KEY_R, BUTTON_4,
+	};
+	
+	const uint8 inventoryMouseMap[] = {
+		MOUSE_X, STICK_1_X, 
+        MOUSE_Y, STICK_1_Y, 
+		MBUTTON_1, BUTTON_5,
+		MBUTTON_2, BUTTON_8,
+		MWHEEL_FORWARD, BUTTON_10,
+		MWHEEL_BACKWARD, BUTTON_11,
+	};
+
+init {
+	
+}
+
+main {
+	if (mouse_status(MBUTTON_2) && mapType == "normal") {
+		combo_run(inventoryState);
+	} else if (key_status(KEY_B)) {
+		keymapping(keyMap);
+		mousemapping(mouseMap);
+		mapType = "normal";
+	} else if (mapType == "normal") {
+		keymapping(keyMap);
+		mousemapping(mouseMap);
+	}
+	
+	if (mouse_status(MBUTTON_1) && mapType == "normal" && antiRecoilState == TRUE) {
+		combo_run(newAntiRecoil);
+	}
+	
+	if (get_val(BUTTON_13) > 50.0 && mapType == "normal") {
+		// If "pull out grenade" button is hit and Inventory is not open, turn off anti recoil
+		antiRecoilState = FALSE;
+	}
+	
+	if (get_val(BUTTON_14) > 50.0 || get_val(BUTTON_6) > 50.0 || get_val(BUTTON_9) > 50.0 || get_val(BUTTON_17) > 50.0) {
+		//Any of these buttons are hit signals grenade no longer being used,
+		//turn on anti-recoil
+		antiRecoilState = TRUE;
+	}
+}
+
+combo inventoryState {
+	set_val(BUTTON_3, 100);
+	wait(100);
+	set_val(BUTTON_3, 0);
+	keymapping(inventoryKeyMap);
+	mousemapping(inventoryMouseMap);
+	mapType = "inventory";
+}
+
+combo newAntiRecoil {
+	//wait(2);
+	verticalMove = get_val(STICK_1_Y);
+	
+	if (check_active(BUTTON_5, 20) && get_val(BUTTON_8) == 0.0) {
+		set_val(STICK_1_Y, verticalMove + 5.0);
+	}
+	
+	if (check_active(BUTTON_5, 20) && get_val(BUTTON_8) == 0.0) {
+		set_val(STICK_1_Y, verticalMove + 14.0);
+	}
+	
+	if (check_active(BUTTON_5, 20) && get_val(BUTTON_8) > 20.0) {
+		set_val(STICK_1_Y, verticalMove + 12.0);
+	}
+	
+	if (check_active(BUTTON_5, 250) && get_val(BUTTON_8) == 0.0) {
+		set_val(STICK_1_Y, verticalMove + 14.0);
+	}
+	
+	if (check_active(BUTTON_5, 500) && get_val(BUTTON_8) == 0.0) {
+		set_val(STICK_1_Y, verticalMove + 15.5);
+	}
+	
+	if (check_active(BUTTON_5, 750) && get_val(BUTTON_8) == 0.0) {
+		set_val(STICK_1_Y, verticalMove + 16.5);
+	}
+	
+	if (check_active(BUTTON_5, 1000) && get_val(BUTTON_8) == 0.0) {
+		set_val(STICK_1_Y, verticalMove + 17.5);
+	}
+	
+	if (check_active(BUTTON_5, 1500) && get_val(BUTTON_8) == 0.0) {
+		set_val(STICK_1_Y, verticalMove + 18.0);
+	}
+	
+}
