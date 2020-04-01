@@ -1,0 +1,119 @@
+#pragma METAINFO("CoD", 1, 0, "")
+
+#include <keyboard.gph>
+#include <mouse.gph>
+
+
+bool antiRecoilState = TRUE;
+bool autoADSState = TRUE;
+fix32 verticalMove = 0.0;
+fix32 antiRecoilStrength = 10.0;
+fix32 FFBstrength1, FFBstrength2;
+uint32 FFBduration1, FFBduration2;
+
+
+main {
+	
+	/*if (mouse_status(MBUTTON_2)) {
+		combo_run(useSpecial);
+	}*/
+	
+	if (mouse_status(MWHEEL_BACKWARD)) {
+		antiRecoilState = FALSE;
+		autoADSState = FALSE;
+	} else if (get_val(BUTTON_17) || get_val(BUTTON_16) || get_val(BUTTON_15)) {
+		antiRecoilState = TRUE;
+		autoADSState = TRUE;
+	}
+	
+	if (mouse_status(MBUTTON_1)) {
+		if(antiRecoilState) {
+			combo_run(newAntiRecoil);
+		}
+		if(autoADSState) {
+			combo_run(autoADS);
+		}
+	}
+	
+	/*
+	If pressing Y button (Mouse wheel click) we must cancel the
+	left/right mouse wheel functions because sometimes they are
+	unintentionally hit
+	*/
+	if (get_val(BUTTON_14)) {
+		combo_run(pressingY);
+	}
+	
+	
+	if (ffb_get_actual(FFB_1, &FFBduration1)) {//If any ffb1 rumble is detected
+		FFBstrength1 = ffb_get_actual(FFB_1, &FFBduration1); //get strength of rumble 1
+		FFBstrength2 = ffb_get_actual(FFB_2, &FFBduration2); //get strength of rumber 2
+
+		/*
+		Check if B is pressed and for the next 200ms if slide rumble is detected, cancel slide
+		*/
+		if(FFBstrength2 == 2.745102 && time_active(BUTTON_15) < 160) {//sprint to slide has occured after B press
+			//printf("SLIDE!!");
+			combo_run(slideCancel);
+		}
+	}
+}
+
+combo pressingY {
+	set_val(BUTTON_6, 0);
+	wait(1500);
+}
+
+combo slideCancel {
+	wait(300);
+	set_val(BUTTON_8, 100);
+	wait(150);
+	set_val(BUTTON_16, 100);
+	wait(100);
+}
+
+combo autoADS {
+	set_val(BUTTON_8, 100);
+}
+
+combo newAntiRecoil {
+	
+	verticalMove = get_val(STICK_1_Y);
+	
+	if (check_active(BUTTON_5, 10)) {
+		if(verticalMove < 20.0) {
+			set_val(STICK_1_Y, verticalMove + (antiRecoilStrength * 0.3));
+		}
+	}
+	
+	if (check_active(BUTTON_5, 250)) {
+		if(verticalMove < 20.0) {
+			set_val(STICK_1_Y, verticalMove + (antiRecoilStrength * 2.3));
+		}
+	}
+	
+	if (check_active(BUTTON_5, 500)) {
+		if(verticalMove < 20.0) {
+			set_val(STICK_1_Y, verticalMove + (antiRecoilStrength * 2.2));
+		}
+	}
+	
+	if (check_active(BUTTON_5, 750)) {
+		if(verticalMove < 20.0) {
+			set_val(STICK_1_Y, verticalMove + (antiRecoilStrength * 2.1));
+		}
+	}
+	
+	if (check_active(BUTTON_5, 1000)) {
+		if(verticalMove < 20.0) {
+			set_val(STICK_1_Y, verticalMove + (antiRecoilStrength * 2.1));
+		}
+	}
+	
+	if (check_active(BUTTON_5, 1500)) {
+		if(verticalMove < 20.0) {
+			set_val(STICK_1_Y, verticalMove + (antiRecoilStrength * 2.0));
+		}
+	}
+	
+}
