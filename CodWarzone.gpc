@@ -2,38 +2,257 @@
 
 #include <keyboard.gph>
 #include <mouse.gph>
+#import "Cod.git"
 
-
+//============== ANTI RECOIL SETTINGS ===========================
+bool weaponString(char *s, char *w) {
+    while (*s) {
+		if(*w != *s) {
+			s++;
+			w++;
+			return FALSE;
+		} else {
+			s++;
+			w++;
+		}
+    }
+    return TRUE;
+}
+fix32 e = 2.71828;
 bool antiRecoilState = TRUE;
-bool autoADSState = TRUE;
+bool shouldRapidFire = FALSE;
 fix32 verticalMove = 0.0;
-fix32 antiRecoilStrength = 10.0;
-fix32 FFBstrength1, FFBstrength2;
-uint32 FFBduration1, FFBduration2;
+fix32 horizontalMove = 0.0;
+fix32 horizontalStrength;
+fix32 verticalStrength;
+fix32 shootingTime;
+fix32 maxHorizontal;
+fix32 verticalDropOff;
+char horizontalRecoilDirection;
+fix32 horizontalGrowthRate;
+fix32 horizontalOffset;
+fix32 verticalDropOffRate;
+fix32 verticalStartValue;
+fix32 sensitivityMultiplier;
+uint32 time = 0;
+//============== GUN SPECIFIC ANTI RECOIL FUNCTION ===========================
 
+void getRecoilSettingsForGun(char *s) {
+	if (weaponString(s, "M4\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 1000 == 0) {
+			printf("M4 RECOIL");
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		verticalDropOff = 18.0; //Maximum strength of vertical recoil compensation
+		verticalDropOffRate = 2.8; //Growth rate of vertical recoil compensation
+		verticalStartValue = 26.0; //MINIMUM vertical recoil compensation (at start of firing)
+		maxHorizontal = 12.0; //Maximum strength of horizontal recoil compensation
+		horizontalGrowthRate = 1.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'R'; // 'L', 'R', or 'N' (which way recoil goes to)
+		horizontalOffset = 0.0;
+	} else if (weaponString(s, "FAL\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 1000 == 0) {
+			printf("FAL RECOIL");
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		verticalDropOff = 10.0; //Maximum strength of vertical recoil compensation
+		verticalDropOffRate = 2.6; //Growth rate of vertical recoil compensation
+		verticalStartValue = 24.0; //MINIMUM vertical recoil compensation (at start of firing)
+		maxHorizontal = 12.0; //Maximum strength of horizontal recoil compensation
+		horizontalGrowthRate = 4.7; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'R'; // 'L', 'R', or 'N' (which way recoil goes to)
+		horizontalOffset = 0.0;
+	} else if (weaponString(s, "PIS\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 1000 == 0) {
+			printf("PISTOL RECOIL");
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		verticalDropOff = 2.5; //Maximum strength of vertical recoil compensation
+		verticalDropOffRate = 2.8; //Growth rate of vertical recoil compensation
+		verticalStartValue = 4.0; //MINIMUM vertical recoil compensation (at start of firing)
+		maxHorizontal = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+		horizontalOffset = 0.0;
+	} else {
+		if (time_active(BUTTON_5) % 1000 == 0) {
+			printf("DEFAULT RECOIL");
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		verticalDropOff = 14.0; //Maximum strength of vertical recoil compensation
+		verticalDropOffRate = 1.1; //Growth rate of vertical recoil compensation
+		verticalStartValue = 22.0; //MINIMUM vertical recoil compensation (at start of firing)
+		maxHorizontal = 9.1; //Maximum strength of horizontal recoil compensation
+		horizontalGrowthRate = 2.1; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+		horizontalOffset = 5.0;
+	}
+	combo_run(newAntiRecoil);
+}
+
+//============== END ANTI RECOIL ===========================
+
+
+bool autoADSState = TRUE;
+bool pressedYswitch = FALSE;
+fix32 FFBstrength2;
+uint32 FFBduration2;
+bool pingSwitch = TRUE;
+bool dropShotSwitch = TRUE;
+bool cvIsReady = FALSE;
+bool weaponRecognizedSwitch = FALSE;
+bool weaponResetSwitch = FALSE;
+char weaponBuffer[4];
+char gunString[4];
+
+bool pistolRapidFireSwitch = FALSE;
+bool checkPistolFireRate = FALSE;
+uint32 pistolRapidFireTimer = 0;
+bool ARrapidFireSwitch = FALSE;
+bool checkARfireRate = FALSE;
+uint32 ARrapidFireTimer = 0;
+
+	const uint8 keyMap[] = {
+        KEY_X, BUTTON_17,
+        KEY_A, BUTTON_16,
+        KEY_B, BUTTON_15,
+        KEY_L, BUTTON_6,
+        KEY_M, BUTTON_14,
+        KEY_R, BUTTON_6,
+    };
+    const uint8 mouseMap[] = {
+        MOUSE_X, STICK_1_X, 
+        MOUSE_Y, STICK_1_Y, 
+        MBUTTON_1, BUTTON_5,
+        MBUTTON_2, BUTTON_4,
+        MWHEEL_FORWARD, BUTTON_10,
+        MWHEEL_BACKWARD, POINT_1_X,
+    };
+
+
+init {
+	keymapping(keyMap);
+	mousemapping(mouseMap);
+	remapper_disable(STICK_1_X);
+	remapper_disable(STICK_1_Y);
+	mxyconverter(Cod_mxyc);
+	port_inhibit_ffb(PORT_USB_A);
+	port_inhibit_ffb(PORT_USB_B);
+	
+	weaponBuffer[0] = "N";
+	weaponBuffer[1] = "O";
+	weaponBuffer[2] = "N";
+	weaponBuffer[3] = "E";
+	weaponBuffer[4] = "\0";
+}
 
 main {
+	gunString[0] = 'N';
+	gunString[1] = 'O';
+	gunString[2] = 'N';
+	gunString[3] = 'E';
+	gunString[4] = '\0';
+	//Check for computer vision updates
+	cvIsReady = gcv_ready();
+	if (cvIsReady) {
+		weaponBuffer[0] = gcv_read(0);
+		weaponBuffer[1] = gcv_read(1);
+		weaponBuffer[2] = gcv_read(2);
+		weaponBuffer[3] = gcv_read(3);
+		weaponBuffer[4] = gcv_read(4);
+		
+		if (!weaponString(&weaponBuffer, "NONE\0") && weaponRecognizedSwitch) {
+			combo_run(weaponRecognizedRumble);
+			printf("Buffer: %c%c%c%c%c", weaponBuffer[0], weaponBuffer[1], weaponBuffer[2], weaponBuffer[3], weaponBuffer[4]);
+		} else if (weaponString(&weaponBuffer, "NONE\0") && weaponResetSwitch) {
+			combo_run(weaponResetRumble);
+			printf("WEAPON RESET");
+		}
+	}
 	
-	/*if (mouse_status(MBUTTON_2)) {
-		combo_run(useSpecial);
+	
+	
+	//rapid fire for single fire weapons
+	if (!get_val(BUTTON_5)) {
+		ARrapidFireTimer = system_time();
+		pistolRapidFireSwitch = FALSE;
+		ARrapidFireSwitch = FALSE;
+		pistolRapidFireTimer = system_time();
+		checkARfireRate = FALSE;
+		checkPistolFireRate = FALSE;
+	}
+	if (ffb_get_actual(FFB_1, NULL) == 7.451004 && ffb_get_actual(FFB_2, NULL) == 1.960785) {
+		pistolRapidFireTimer = system_time();
+		checkPistolFireRate = TRUE;
+	}
+	if (checkPistolFireRate && system_time() - pistolRapidFireTimer > 20) {
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("PISTOL RAPID FIRE");
+		}
+		pistolRapidFireSwitch = TRUE;
+	}
+	if (pistolRapidFireSwitch) {
+		gunString[0] = 'P';
+		gunString[1] = 'I';
+		gunString[2] = 'S';
+		gunString[3] = '\0';
+		combo_run(pistolRapidFire);
+	}
+	
+	//SUPPRESSED WEAPONS
+	/*if (ffb_get_actual(FFB_1, NULL) == 7.451004 && ffb_get_actual(FFB_2, NULL) == 1.960785) {
+		pistolRapidFireTimer = system_time();
+		checkPistolFireRate = TRUE;
 	}*/
+	//AR
+	if (ffb_get_actual(FFB_1, NULL) == 11.764755 && ffb_get_actual(FFB_2, NULL) == 11.764755) {
+		checkARfireRate = TRUE;
+		ARrapidFireTimer = system_time();
+	}
 	
-	if (mouse_status(MWHEEL_BACKWARD)) {
+	if (checkARfireRate && get_val(BUTTON_5) && system_time() - ARrapidFireTimer > 120) {
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("SINGLE FIRE");
+			printf("time: %f", system_time() - ARrapidFireTimer);
+		}
+		ARrapidFireSwitch = TRUE;
+	}
+	if (ARrapidFireSwitch) {
+		gunString[0] = 'F';
+		gunString[1] = 'A';
+		gunString[2] = 'L';
+		gunString[3] = '\0';
+		combo_run(ARrapidFire);
+	}
+	
+	
+	//Toggle Anti Recoil on/off for driving
+	if (mouse_status(MWHEEL_BACKWARD) && !pressedYswitch) {
 		antiRecoilState = FALSE;
 		autoADSState = FALSE;
-	} else if (get_val(BUTTON_17) || get_val(BUTTON_16) || get_val(BUTTON_15)) {
+	} else if (get_val(BUTTON_17) || get_val(BUTTON_16) || get_val(BUTTON_15) || get_val(BUTTON_14)) {
 		antiRecoilState = TRUE;
 		autoADSState = TRUE;
 	}
 	
+	
+	
+	//Antirecoil while holding left mouse button (Fire)
 	if (mouse_status(MBUTTON_1)) {
 		if(antiRecoilState) {
-			combo_run(newAntiRecoil);
+			getRecoilSettingsForGun(&gunString);
 		}
+		//Always ADS while holding left mouse button (if enabled)
 		if(autoADSState) {
 			combo_run(autoADS);
 		}
 	}
+	
+	
 	
 	/*
 	If pressing Y button (Mouse wheel click) we must cancel the
@@ -43,25 +262,102 @@ main {
 	if (get_val(BUTTON_14)) {
 		combo_run(pressingY);
 	}
+	if (event_release(BUTTON_14)) {
+		weaponRecognizedSwitch = TRUE;
+	}
 	
 	
-	if (ffb_get_actual(FFB_1, &FFBduration1)) {//If any ffb1 rumble is detected
-		FFBstrength1 = ffb_get_actual(FFB_1, &FFBduration1); //get strength of rumble 1
-		FFBstrength2 = ffb_get_actual(FFB_2, &FFBduration2); //get strength of rumber 2
-
-		/*
-		Check if B is pressed and for the next 200ms if slide rumble is detected, cancel slide
-		*/
-		if(FFBstrength2 == 2.745102 && time_active(BUTTON_15) < 160) {//sprint to slide has occured after B press
-			//printf("SLIDE!!");
-			combo_run(slideCancel);
+	
+	/*Turn off rumble if rumble occurs*/
+	if (ffb_get(FFB_1, NULL) > 0.0 || ffb_get(FFB_2, NULL) > 0.0 || ffb_get(FFB_3, NULL) > 0.0) {
+		ffb_set(FFB_1, 0.0, 15);
+		ffb_set(FFB_2, 0.0, 15);
+		ffb_set(FFB_3, 0.0, 15);
+	}
+	
+	
+	
+	//Check if B is pressed and for the next 200ms if slide rumble is detected, cancel slide
+	FFBstrength2 = ffb_get_actual(FFB_2, &FFBduration2); //get strength of rumber 2
+	if(FFBstrength2 == 2.745102 && time_release(BUTTON_15) < 260 && get_val(STICK_2_Y) < -55.0) {//sprint to slide has occured after B press
+		combo_run(slideCancel);
+	}
+	
+	
+	
+	//Ping players upon shooting at them
+	if (get_val(BUTTON_8) && get_val(BUTTON_5) && time_release(BUTTON_5) > 2000) {
+		if (pingSwitch) {
+			combo_run(pingPlayer);
+			pingSwitch = FALSE;
 		}
+	} else {
+		pingSwitch = TRUE;
+	}
+	
+	
+	
+	//drop shot combo while holding B, reset switch by pressing A
+	if (get_val(BUTTON_16)) {
+		dropShotSwitch = TRUE;
+	}
+	if (check_active(BUTTON_15, 320)) {
+		if (dropShotSwitch) {
+			combo_run(dropShot);
+		}
+	}
+	
+	
+	
+	//Keep track of shooting time for anti recoil
+	if (get_val(BUTTON_5)) {
+		time = time_active(BUTTON_5);
+	} else {
+		time = 0;
+		horizontalStrength = 0.0;
 	}
 }
 
+combo weaponRecognizedRumble {
+	weaponRecognizedSwitch = FALSE;
+	ffb_set(FFB_4, 2.5, 15);
+	wait(100);
+	ffb_set(FFB_4, 0.0, 15);
+	wait(175);
+	ffb_set(FFB_4, 2.5, 15);
+	wait(100);
+	weaponResetSwitch = TRUE;
+}
+
+combo weaponResetRumble {
+	weaponResetSwitch = FALSE;
+	ffb_set(FFB_4, 5.0, 15);
+	wait(400);
+}
+
+combo pingPlayer {
+	set_val(BUTTON_10, 100);
+	wait(100);
+	set_val(BUTTON_10, 0);
+}
+
+combo dropShot {
+	dropShotSwitch = FALSE;
+	set_val(STICK_1_Y, -80);//adjust aim up on crouch
+	set_val(STICK_2_Y, 0);//
+	set_val(STICK_2_X, 0);//
+	wait(75);
+	set_val(STICK_2_Y, 0);//
+	set_val(STICK_2_X, 0);//
+	wait(150);
+	
+}
+
 combo pressingY {
+	pressedYswitch = TRUE;
 	set_val(BUTTON_6, 0);
-	wait(1500);
+	wait(1000);
+	pressedYswitch = FALSE;
 }
 
 combo slideCancel {
@@ -76,44 +372,50 @@ combo autoADS {
 	set_val(BUTTON_8, 100);
 }
 
+combo pistolRapidFire {
+	set_val(BUTTON_5, 0);
+	wait(32);
+	set_val(BUTTON_5, 100);
+	wait(32);
+	set_val(BUTTON_5, 0);
+	wait(140);
+}
+
+combo ARrapidFire {
+	set_val(BUTTON_5, 0);
+	wait(32);
+	set_val(BUTTON_5, 100);
+	wait(32);
+	set_val(BUTTON_5, 0);
+	//wait(10);
+}
+
+
 combo newAntiRecoil {
+	shootingTime = (fix32) time / 1000.0;
+	sensitivityMultiplier = 1.0;
 	
-	verticalMove = get_val(STICK_1_Y);
-	
-	if (check_active(BUTTON_5, 10)) {
-		if(verticalMove < 20.0) {
-			set_val(STICK_1_Y, verticalMove + (antiRecoilStrength * 0.3));
-		}
+	if (horizontalRecoilDirection == 'R') {
+		horizontalStrength = (maxHorizontal * (1.0 - (pow(e, (-horizontalGrowthRate * (shootingTime - (0.0)))))));
+		horizontalMove = -abs(horizontalStrength) + horizontalOffset;
+	} else if (horizontalRecoilDirection == 'L') {
+		horizontalStrength = (maxHorizontal * (1.0 - (pow(e, (-horizontalGrowthRate * (shootingTime - (0.0)))))));
+		horizontalMove = horizontalStrength - horizontalOffset;
+	} else {
+		horizontalStrength = 0.0;
+		horizontalMove = horizontalStrength;
 	}
 	
-	if (check_active(BUTTON_5, 250)) {
-		if(verticalMove < 20.0) {
-			set_val(STICK_1_Y, verticalMove + (antiRecoilStrength * 2.3));
+	verticalStrength = (verticalDropOff * (1.0 - (pow(e, (-verticalDropOffRate * (shootingTime - 0.0)))))) - (pow(verticalStartValue, (0.92 + (0.9 / 9.0))));
+	verticalMove = abs(verticalStrength);
+		
+	if (abs(get_val(STICK_1_X) + (horizontalMove * sensitivityMultiplier)) <= 100.0) {
+		set_val(STICK_1_X, get_val(STICK_1_X) + (horizontalMove * sensitivityMultiplier));
+	}
+	if (get_val(STICK_1_Y) + (verticalMove * sensitivityMultiplier) <= 100.0) {
+		set_val(STICK_1_Y, get_actual(STICK_1_Y) + (verticalMove * sensitivityMultiplier));
+		if (get_actual(STICK_1_Y) <= -100.0 + (verticalMove * sensitivityMultiplier)) {
+			set_val(STICK_1_Y, get_actual(STICK_1_Y));
 		}
 	}
-	
-	if (check_active(BUTTON_5, 500)) {
-		if(verticalMove < 20.0) {
-			set_val(STICK_1_Y, verticalMove + (antiRecoilStrength * 2.2));
-		}
-	}
-	
-	if (check_active(BUTTON_5, 750)) {
-		if(verticalMove < 20.0) {
-			set_val(STICK_1_Y, verticalMove + (antiRecoilStrength * 2.1));
-		}
-	}
-	
-	if (check_active(BUTTON_5, 1000)) {
-		if(verticalMove < 20.0) {
-			set_val(STICK_1_Y, verticalMove + (antiRecoilStrength * 2.1));
-		}
-	}
-	
-	if (check_active(BUTTON_5, 1500)) {
-		if(verticalMove < 20.0) {
-			set_val(STICK_1_Y, verticalMove + (antiRecoilStrength * 2.0));
-		}
-	}
-	
 }
