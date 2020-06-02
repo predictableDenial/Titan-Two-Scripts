@@ -1,0 +1,53 @@
+#pragma METAINFO("SoT", 1, 0, "")
+
+#include <keyboard.gph>
+#include <mouse.gph>
+
+#import "SoT.git"
+
+	const uint8 keyMap[] = {
+        KEY_X, BUTTON_17,
+        KEY_A, BUTTON_16,
+        KEY_B, BUTTON_15,
+        KEY_L, BUTTON_9,
+        KEY_M, BUTTON_14,
+        KEY_R, BUTTON_6,
+    };
+    const uint8 mouseMap[] = {
+        MOUSE_X, STICK_1_X, 
+        MOUSE_Y, STICK_1_Y, 
+        MBUTTON_1, BUTTON_5,
+        MBUTTON_2, BUTTON_4,
+        MWHEEL_FORWARD, BUTTON_13,
+        MWHEEL_BACKWARD, BUTTON_3,
+    };
+    const uint8 inventoryKeyMap[] = {
+        KEY_X, BUTTON_17,
+        KEY_A, BUTTON_16,
+        KEY_B, BUTTON_15,
+        KEY_L, BUTTON_7,
+        KEY_M, BUTTON_14,
+        KEY_R, BUTTON_4,
+    };
+    const uint8 inventoryMouseMap[] = {
+        MOUSE_X, STICK_1_X, 
+        MOUSE_Y, STICK_1_Y, 
+        MBUTTON_1, BUTTON_5,
+        MBUTTON_2, BUTTON_8,
+        MWHEEL_FORWARD, BUTTON_10,
+        MWHEEL_BACKWARD, BUTTON_11,
+    };
+
+init {
+	remapper_disable(STICK_1_X);
+	remapper_disable(STICK_1_Y);
+	mxyconverter(SoT_mxyc);
+}
+
+main {
+	keymapping(keyMap);
+	mousemapping(mouseMap);
+	
+	remapper_disable(STICK_1_X);
+	remapper_disable(STICK_1_Y);
+}
