@@ -1,0 +1,71 @@
+
+fix32 YincrementAmount = 2.05;
+fix32 XincrementAmount = 0.1;
+
+int timeBetweenIncrement = 17;
+uint32 shotTimer;
+bool shooting = FALSE;
+fix32 value = 0.0;
+fix32 prev = 0.0;
+fix32 xVal = 0.0;
+uint32 timer;
+fix32 stickYval = 0.0;
+bool triggered = FALSE;
+
+init {
+    // start cv script
+    //printf("GCMD:ComputerVision.Start:nba_2");
+}
+
+main {
+
+    if (gcv_ready()) { // data was received
+		shooting = gcv_read(0);
+        gcv_read(1, &value);
+        if (prev != value) {
+			shotTimer = 0;
+            prev = value;
+			printf("received: %f", value);
+        }
+    }
+	
+    //SHOOTING
+	if (is_active(BUTTON_6)) {
+		//stickYval = 0.0;
+		timer += elapsed_time();
+		triggered = TRUE;
+	} else {
+		triggered = FALSE;
+		stickYval = 0.0;
+		timer = 0;
+		xVal = 0.0;
+	}
+	
+	if (triggered) {
+		//set_val(BUTTON_6, 0);
+		if (timer > timeBetweenIncrement && stickYval < 100.0) {
+			stickYval = stickYval + YincrementAmount;
+			timer = system_time();
+		}
+		if (stickYval > 100.0) {
+			stickYval = 100.0;
+		}
+		set_val(STICK_1_Y, stickYval);
+		
+		if (xVal < value + (value * 0.14)) {
+			xVal += XincrementAmount;
+		}
+		if (xVal > value + (value * 0.14)) {
+			xVal = value + (value * 0.14);
+		}
+		set_val(STICK_1_X, xVal);
+	}
+	/*if (shooting) {
+		shotTimer += elapsed_time();
+	}
+	if (get_val(STICK_1_Y) >= 90.0 && get_val(STICK_1_X) <= 30.0 && get_val(STICK_1_X) >= -30.0) {
+		set_val(STICK_1_X, 0);
+		xVal = value + (value * 0.3);
+		set_val(STICK_1_X, xVal);
+	}*/
+}
