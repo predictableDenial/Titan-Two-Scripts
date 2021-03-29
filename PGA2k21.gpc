@@ -1,0 +1,72 @@
+#pragma METAINFO("PGA2k21", 1, 0, "jaj")
+
+uint32 timer;
+uint32 swingTimer;
+fix32 stickYval = 0.0;
+bool backswing = FALSE;
+bool frontswing = FALSE;
+fix32 prevRumble = 0.0;
+
+fix32 incrementAmount = 3.3;
+int timeBetweenIncrement = 1;
+
+
+main {
+	if (ffb_get_actual(FFB_2, NULL) != 0.0) {
+		prevRumble = ffb_get_actual(FFB_2, NULL);
+		printf("%f", prevRumble);
+	}
+	
+	if (event_active(BUTTON_6)) {
+		prevRumble = 0.0;
+		set_val(BUTTON_6, 0);
+		combo_run(swing);
+		stickYval = 0.0;
+		timer = system_time();
+	}
+	if (frontswing) {
+		combo_stop(swing);
+		set_val(BUTTON_6, 0);
+		if (system_time() - timer > timeBetweenIncrement && stickYval > -100.0) {
+			stickYval = stickYval - incrementAmount;
+			timer = system_time();
+		}
+		if (stickYval < -100.0) {
+			stickYval = -100.0;
+		}
+		if (system_time() - timer > 1200) {
+			printf("%f", prevRumble);
+			frontswing = FALSE;
+		}
+		set_val(STICK_1_Y, stickYval);
+	}
+	
+	//Putting
+	if (prevRumble == 15.686340) {
+		combo_stop(swing);
+		combo_run(putt);
+	}
+}
+
+combo putt {
+	set_val(STICK_1_Y, 100.0);
+	wait(100);
+	set_val(STICK_1_Y, -100.0);
+	wait(900);
+}
+
+combo swing {
+	set_val(BUTTON_6, 0);
+	wait(80);
+	set_val(BUTTON_6, 0);
+	set_val(STICK_1_Y, 42.12);
+	wait(80);
+	set_val(BUTTON_6, 0);
+	set_val(STICK_1_Y, 100.0);
+	wait(500);
+	if (prevRumble > 38.0) {
+		frontswing = TRUE;
+	}
+	set_val(STICK_1_Y, 100.0);
+	wait(1300);
+}
