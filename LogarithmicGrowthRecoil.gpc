@@ -1,0 +1,52 @@
+#pragma METAINFO("LogarithmicGrowthAntiRecoil", 1, 0, "jaj")
+
+#define FIRE_BUTTON BUTTON_5 // Select fire button
+#define e  2.71828 // DO NOT CHANGE
+
+fix32 verticalStrength;
+fix32 shootingTime;
+fix32 maxVerticalStrength;
+fix32 verticalRecoilGrowthRate;
+int startPoint;
+fix32 multiplier;
+uint32 time;
+
+
+init {
+	remapper_disable(STICK_1_X); //disable (comment) line if not using mouse
+	remapper_disable(STICK_1_Y); //disable (comment) line if not using mouse
+	
+	/*
+	THIS IS AN EXAMPLE OF A LOGARITHMIC GROWTH CURVE ANTI RECOIL, FOR GAMES (LIKE PUBG) WITH 
+	LOGARITHMIC RECOIL PATTERNS. A GAME LIKE COD USES AN EARLY, INTENSE BURST OF RECOIL UPON FIRING, 
+	AND WILL NOT BE SUFFICIENT WITHOUT MODIFICATION. THIS IS JUST AN EXAMPLE AND IS NOT OFFERED,
+	NOR SUPPORTED FOR ANY SPECIFIC GAME. CHANGE THE VALUES BELOW AND WATCH DEVICE MONITOR FOR TESTING.
+	*/
+	
+	maxVerticalStrength = 27.0; //MAXIMUM value of the stick Y axis. 
+								//The curve will slow while reaching and stop growing once this value is reached
+	
+	verticalRecoilGrowthRate = 1.5; //Logarithmic growth rate of recoil compensation.
+									//Determines how quicklyy the Y axis value goes from minimum to maximum
+									//Small changes have big effects (keep around 1.0 to 2.0)
+	
+	startPoint = 500; //STARTING point of the recoil (Y axis) value along the growth curve
+					  //Set in milliseconds (1000 = 1 second). If set to 0, recoil compensation starts at 0
+					  //Increase/decrease in increments of 50 should be plenty
+	
+	multiplier = 1.0; //Flat multiplier. Can be used for changes in sensitivity, scopes, etc. 
+					  //Should generally be left at 1.0 unless you have a reason to change it
+}
+
+main {
+	if(get_val(FIRE_BUTTON)) {
+		combo_run(jajAntiRecoil);
+	}
+}
+
+combo jajAntiRecoil {
+	time = time_active(FIRE_BUTTON);
+	shootingTime = (fix32) time / 1000f;
+	verticalStrength = maxVerticalStrength * (multiplier - (pow(e, (-verticalRecoilGrowthRate * (shootingTime + ((fix32) startPoint / 1000f))))));
+	set_val(STICK_1_Y, clamp(get_val(STICK_1_Y) + (verticalStrength), -100f, 100f));
+}
