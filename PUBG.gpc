@@ -3,7 +3,10 @@
 #include <keyboard.gph>
 #include <mouse.gph>
 
-#import "Pubg.git"
+#define _v(a)  (a >> 8) , (0x00ff & a)
+#define v(label, a)  _v(a##0##i)
+
+#define ADS_BUTTON BUTTON_8
 
 //============== ANTI RECOIL SETTINGS ===========================
 bool weaponString(char *s, char *w) {
@@ -37,28 +40,289 @@ fix32 sensitivityMultiplier;
 uint32 time = 0;
 //============== GUN SPECIFIC ANTI RECOIL FUNCTION ===========================
 
+/*Scopes: Start on 2x (For both maxVerticalStrength AND minimumVerticalValue
+Red Dot Value = 2xValue * 0.82
+2x value = 2xValue * 1
+3x value = 2xValue * 1.47
+4x value = 2xValue * 1.56
+6x value = 2xValue * 1.65
+*/
+fix32 multiplier = 1.00;
+
 void getRecoilSettingsForGun(char *s) {
-	if (weaponString(s, "SLR")) { //Compare *s to the weapon name
+	if (weaponString(s, "M4\0")) { //Compare *s to the weapon name
 		if (time_active(BUTTON_5) % 200 == 0) {
-			printf("SLR RECOIL");
+			printf("M4 RECOIL, Multiplier: %f", multiplier);
 		}
 		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
 		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
-		maxVerticalStrength = 23.0; //Maximum strength of vertical recoil compensation
-		verticalRecoilGrowthRate = 3.8; //Growth rate of vertical recoil compensation
-		minimumVerticalValue = 23.0; //MINIMUM vertical recoil compensation (at start of firing)
+		maxVerticalStrength = 38.0 * multiplier; //Maximum strength of vertical recoil compensation
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 32.0 * multiplier; //MINIMUM vertical recoil compensation (at start of firing)
 		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
 		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
-		horizontalRecoilDirection = 'R'; // 'L', 'R', or 'N' (which way recoil goes to)
-	} else {
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "AKM\0")) { //Compare *s to the weapon name
 		if (time_active(BUTTON_5) % 200 == 0) {
-			printf("DEFAULT RECOIL");
+			printf("AKM RECOIL, Multiplier: %f", multiplier);
 		}
 		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
 		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
-		maxVerticalStrength = 25.0; //Maximum strength of vertical recoil compensation
-		verticalRecoilGrowthRate = 2.8; //Growth rate of vertical recoil compensation
-		minimumVerticalValue = 21.0; //MINIMUM vertical recoil compensation (at start of firing)
+		maxVerticalStrength = 35.0 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.5; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 27.5 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "DP\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("DP RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 25.5 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 19.0 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "QBZ\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("QBZ RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 37.4 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 31.0 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "M249\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("M249 RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 32.0 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 31.5 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "GROZ\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("GROZA RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 33.0 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 27.5 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "UMP\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("UMP RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 33.0 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue =27.0 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "AUG\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("AUG RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 35.0 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 27.0 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "VSS\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("VSS RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 58.0 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 45.0 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "MK14\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("MK14 RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 45.0 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 31.5 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "BER\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("BERYL RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 40.5 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 4.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 35.0 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "VEC\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("VECTOR RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 44.0 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 4.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 30.4 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "G36\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("G36 RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 39.0 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 28.0 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "MG3\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("MG3 RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 30.5 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 25.5 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "BIZ\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("BIZON RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 29.0 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 27.0 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "TOM\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("TOMMY GUN RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 38.0 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 27.5 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "MP5\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("MP5 RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 32.4 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 30.5 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "M16\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("M16 RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = TRUE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 32.4 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 30.5 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "MINI\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("MINI RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = TRUE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 32.4 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 30.5 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "SKS\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("SKS RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = TRUE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 32.4 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 30.5 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "SLR\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("SLR RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = TRUE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 32.4 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 30.5 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else if (weaponString(s, "QBU\0")) { //Compare *s to the weapon name
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("QBU RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = TRUE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 32.4 * multiplier; //Maximum strength of vertical recoil compensation //27.0 for 2x
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 30.5 * multiplier; //MINIMUM vertical recoil compensation (at start of firing) //24.5 for 2x
+		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
+		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
+		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
+	} else {
+		if (time_active(BUTTON_5) % 200 == 0) {
+			printf("DEFAULT RECOIL, Multiplier: %f", multiplier);
+		}
+		antiRecoilState = TRUE; //Should anti recoil activate for this weapon?
+		shouldRapidFire = FALSE; //Should rapid fire activate? (Single shot guns)
+		maxVerticalStrength = 25.0 * multiplier; //Maximum strength of vertical recoil compensation
+		verticalRecoilGrowthRate = 3.0; //Growth rate of vertical recoil compensation
+		minimumVerticalValue = 20.0 * multiplier; //MINIMUM vertical recoil compensation (at start of firing)
 		maxHorizontalStrength = 0.0; //Maximum strength of horizontal recoil compensation
 		horizontalRecoilGrowthRate = 0.0; //Growth rate of horizontal recoil compensation
 		horizontalRecoilDirection = 'N'; // 'L', 'R', or 'N' (which way recoil goes to)
@@ -71,6 +335,11 @@ void getRecoilSettingsForGun(char *s) {
 bool ARrapidFireSwitch = FALSE;
 bool checkARfireRate = FALSE;
 uint32 ARrapidFireTimer = 0;
+
+int gunInt;
+int prevGunInt = 99;
+int scopeInt;
+char gunString[4];
 
 int mapType = "normal";
 bool holdBreatheSwitch = TRUE;
@@ -88,8 +357,8 @@ bool holdBreatheSwitch = TRUE;
         MOUSE_Y, STICK_1_Y, 
         MBUTTON_1, BUTTON_5,
         MBUTTON_2, BUTTON_3,
-        MWHEEL_FORWARD, BUTTON_6,
-        MWHEEL_BACKWARD, BUTTON_10,
+        MWHEEL_FORWARD, BUTTON_10,
+        MWHEEL_BACKWARD, BUTTON_6,
     };
     const uint8 inventoryKeyMap[] = {
         KEY_X, BUTTON_17,
@@ -109,36 +378,344 @@ bool holdBreatheSwitch = TRUE;
     };
 
 init {
+	keymapping(keyMap);
+	mousemapping(mouseMap);
 	remapper_disable(STICK_1_X);
 	remapper_disable(STICK_1_Y);
-	mxyconverter(Pubg_mxyc);
+	remapper_swap(BUTTON_7, BUTTON_6);
+	
+	const uint8 mxyc[] = { ADS_BUTTON,
+
+  // HIP SETTINGS ---
+    v(HIP Sensitivity, 2.25),
+    v(HIP YX Ratio,    1.00),
+    v(HIP DD Factor,   0.05),
+    
+    // DEADZONE 10% = 10.71 / DEADZONE 0% = 0.00
+    v(HIP Deadzone Horizontal, 0.0), 
+    v(HIP Deadzone Vertical,   0.0),
+    v(HIP Deadzone Shape, 1.00),
+    
+    // HIP CURVE DEADZONE 10%
+    //0x00, 0x00, 0x12, 0x87, 0x1B, 0xA3, 0x22, 0xDC, 0x28, 0xEB, 0x2E, 0x85, 0x33, 0x91, 0x38, 0x3F, 0x3B, 0xEB, 0x3D, 0x11, 0x3E, 0x3A, 0x3F, 0xCA, 0x42, 0xE8, 0x46, 0x17, 0x49, 0x0A, 0x4B, 0xEB, 0x4E, 0xBD, 0x51, 0x63, 0x54, 0x0C, 0x56, 0xA8, 0x59, 0x4A,
+
+    // HIP CURVE DEADZONE 0%
+    0x00, 0x00, 0x14, 0xC0, 0x1E, 0xF5, 0x27, 0x0A, 0x2D, 0xD4, 0x34, 0x19, 0x39, 0xC2, 0x3F, 0x00, 0x43, 0x1C, 0x44, 0x66, 0x45, 0xB3, 0x47, 0x70, 0x4A, 0xF0, 0x4E, 0x80, 0x51, 0xCC, 0x55, 0x07, 0x58, 0x30, 0x5B, 0x28, 0x5E, 0x23, 0x61, 0x0F, 0x64, 0x00,
+
+  // ADS SETTINGS ---
+    v(ADS Sensitivity, 2.25),
+    v(ADS YX Ratio,    1.00),
+    v(ADS DD Factor,   0.05),
+    
+    // DEADZONE 10% = 11.56 / DEADZONE 0% = 0.00
+    v(ADS Deadzone Horizontal, 0.0), 
+    v(ADS Deadzone Vertical,   0.0),
+    v(ADS Deadzone Shape, 1.00),
+    
+    // ADS CURVE DEADZONE 10%
+    //0x00, 0x00, 0x0F, 0x75, 0x17, 0x6E, 0x1D, 0xBA, 0x23, 0x28, 0x28, 0x23, 0x2C, 0x97, 0x30, 0xAE, 0x34, 0x75, 0x38, 0x0F, 0x3B, 0xAE, 0x3F, 0x02, 0x42, 0x33, 0x45, 0x40, 0x48, 0x30, 0x4B, 0x28, 0x4D, 0xF5, 0x50, 0xA6, 0x53, 0x4A, 0x55, 0xD7, 0x58, 0x70
+
+    // ADS CURVE DEADZONE 0%
+    0x00, 0x00, 0x11, 0x78, 0x1A, 0x7A, 0x21, 0x97, 0x27, 0xBA, 0x2D, 0x59, 0x32, 0x63, 0x37, 0x02, 0x3B, 0x47, 0x3F, 0x59, 0x43, 0x70, 0x47, 0x33, 0x4A, 0xCF, 0x4E, 0x40, 0x51, 0x91, 0x54, 0xEE, 0x58, 0x17, 0x5B, 0x21, 0x5E, 0x1E, 0x61, 0x00, 0x63, 0xEE
+  };
+  mxyconverter(mxyc);
 	port_inhibit_ffb(PORT_USB_A);
 	port_inhibit_ffb(PORT_USB_B);
+	
+	gunString[0] = 'N';
+	gunString[1] = 'O';
+	gunString[2] = 'N';
+	gunString[3] = 'E';
+	gunString[4] = '\0';
+	
 }
 
+fix32 stick_1_x = 0.0;
+fix32 stick_1_y = 0.0;
+bool inBox;
+fix32 radius;
+fix32 angle;
+fix32 x;
+fix32 y;
+
 main {
+	/*if (get_val(BUTTON_8)) {
+		set_val(STICK_1_X, get_actual(STICK_1_X) + stick_1_x);
+		set_val(STICK_1_Y, get_actual(STICK_1_Y) + stick_1_y);
+	}*/
+//printf("HELLO");
+	if (gcv_ready()) {
+		gunInt = gcv_read(0);
+		scopeInt = gcv_read(1);
+		gcv_read(2, &inBox);
+		gcv_read(3, &angle);
+		gcv_read(7, &radius);
+		gcv_read(11, &x);
+		gcv_read(15, &y);
+		if (x != 0.0 && y != 0.0) {
+			x = x - 960f;
+			y = y - 540f;
+		}
+		//gcv_read(1, &stick_1_x);
+		//gcv_read(5, &stick_1_y);
+		//printf("X: %f", stick_1_x);
+		//printf("Y: %f", stick_1_y);
+		//printf("Scope Int: %i", scopeInt);
+		
+		switch(scopeInt) {
+			case 1:
+				multiplier = 0.53;
+				break;
+			case 2:
+				multiplier = 0.65;
+				break;
+			case 3:
+				multiplier = 1.00;
+				break;
+			case 4:
+				multiplier = 1.03;
+				break;
+			case 6:
+				multiplier = 1.10;
+				break;
+		}
+		if (gunInt != prevGunInt) {
+			switch(gunInt) {
+				case 1:
+					printf("S:M4 Detected");
+					gunString[0] = 'M';
+					gunString[1] = '4';
+					gunString[2] = '\0';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 2:
+					printf("S:AKM Detected");
+					gunString[0] = 'A';
+					gunString[1] = 'K';
+					gunString[2] = 'M';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 3:
+					printf("S:BERYL Detected");
+					gunString[0] = 'B';
+					gunString[1] = 'E';
+					gunString[2] = 'R';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 4:
+					printf("S:G36 Detected");
+					gunString[0] = 'G';
+					gunString[1] = '3';
+					gunString[2] = '6';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 5:
+					printf("S:AUG Detected");
+					gunString[0] = 'A';
+					gunString[1] = 'U';
+					gunString[2] = 'G';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 6:
+					printf("S:Growza Detected");
+					gunString[0] = 'G';
+					gunString[1] = 'R';
+					gunString[2] = 'O';
+					gunString[3] = 'Z';
+					gunString[4] = '\0';
+					break;
+				case 7:
+					printf("S:QBZ Detected");
+					gunString[0] = 'Q';
+					gunString[1] = 'B';
+					gunString[2] = 'Z';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 8:
+					printf("S:DP-28 Detected");
+					gunString[0] = 'D';
+					gunString[1] = 'P';
+					gunString[2] = '\0';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 9:
+					printf("S:M249 Detected");
+					gunString[0] = 'M';
+					gunString[1] = '2';
+					gunString[2] = '4';
+					gunString[3] = '9';
+					gunString[4] = '\0';
+					break;
+				case 10:
+					printf("S:MG3 Detected");
+					gunString[0] = 'M';
+					gunString[1] = 'G';
+					gunString[2] = '3';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 11:
+					printf("S:Vector Detected");
+					gunString[0] = 'V';
+					gunString[1] = 'E';
+					gunString[2] = 'C';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 12:
+					printf("S:U-M-P Detected");
+					gunString[0] = 'U';
+					gunString[1] = 'M';
+					gunString[2] = 'P';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 13:
+					printf("S:Tommy Gun Detected");
+					gunString[0] = 'T';
+					gunString[1] = 'O';
+					gunString[2] = 'M';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 14:
+					printf("S:Byizon Detected");
+					gunString[0] = 'B';
+					gunString[1] = 'I';
+					gunString[2] = 'Z';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 15:
+					printf("S:MP5 Detected");
+					gunString[0] = 'M';
+					gunString[1] = 'P';
+					gunString[2] = '5';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 16:
+					printf("S:VSS Detected");
+					gunString[0] = 'V';
+					gunString[1] = 'S';
+					gunString[2] = 'S';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 17:
+					printf("S:MK14 Detected");
+					gunString[0] = 'M';
+					gunString[1] = 'K';
+					gunString[2] = '1';
+					gunString[3] = '4';
+					gunString[4] = '\0';
+					break;
+				case 18:
+					printf("S:SCAR Detected");
+					gunString[0] = 'S';
+					gunString[1] = 'C';
+					gunString[2] = 'A';
+					gunString[3] = 'R';
+					gunString[4] = '\0';
+					break;
+				case 19:
+					printf("S:M16 Detected");
+					gunString[0] = 'M';
+					gunString[1] = '1';
+					gunString[2] = '6';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 20:
+					printf("S:Mini Detected");
+					gunString[0] = 'M';
+					gunString[1] = 'I';
+					gunString[2] = 'N';
+					gunString[3] = 'I';
+					gunString[4] = '\0';
+					break;
+				case 21:
+					printf("S:SKS Detected");
+					gunString[0] = 'S';
+					gunString[1] = 'K';
+					gunString[2] = 'S';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 22:
+					printf("S:SLR Detected");
+					gunString[0] = 'S';
+					gunString[1] = 'L';
+					gunString[2] = 'R';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				case 23:
+					printf("S:QBU Detected");
+					gunString[0] = 'Q';
+					gunString[1] = 'B';
+					gunString[2] = 'U';
+					gunString[3] = '\0';
+					gunString[4] = '\0';
+					break;
+				default:
+					gunString[0] = 'N';
+					gunString[1] = 'O';
+					gunString[2] = 'N';
+					gunString[3] = 'E';
+					gunString[4] = '\0';
+					break;
+			}
+		}
+		prevGunInt = gunInt;
+	}
+	
+	/*if (get_val(BUTTON_12)) {
+		if (inBox) {
+			//set_val(BUTTON_5, 100);
+		} else {
+			set_val(STICK_1_X, clamp((get_actual(STICK_1_X) / 2f) + (x / 3.3), -100.00, 100.00));
+			set_val(STICK_1_Y, clamp((get_actual(STICK_1_Y) / 2f) + (y / 3.3), -20.00, 100.00));
+		}
+		//combo_run(runPolar);
+	}
+	if (get_val(BUTTON_8)) {
+		if (inBox) {
+			//set_val(BUTTON_5, 100);
+		} else {
+			set_val(STICK_1_X, clamp((get_actual(STICK_1_X) / 2f) + (x / 2.7), -100.00, 100.00));
+			set_val(STICK_1_Y, clamp((get_actual(STICK_1_Y) / 2f) + (y / 2.7), -20.00, 100.00));
+		}
+		//combo_run(runPolar);
+	}*/
+	
 	if (mouse_status(MBUTTON_2) && mapType == "normal" && !get_val(BUTTON_8)) {
 		combo_run(inventoryState);
 	} else if (key_status(KEY_B)) {
 		mapType = "normal";
 		keymapping(keyMap);
 		mousemapping(mouseMap);
-	} else if (mapType == "normal") {
-		keymapping(keyMap);
-		mousemapping(mouseMap);
 	}
 	
 	if (mapType == "normal" && get_val(BUTTON_8)) {
 		//Antirecoil while holding left mouse button (Fire)
-		if (mouse_status(MBUTTON_1)) {
+		if (get_val(BUTTON_5)) {
 			if(antiRecoilState) {
-				getRecoilSettingsForGun("NONE");
+				getRecoilSettingsForGun(&gunString);
 			}
 		}
-		if (get_val(BUTTON_6)) {
+		set_val(BUTTON_10, 0);
+		if (get_actual(BUTTON_10)) {
 			combo_run(zoomScopeIn);
 		}
-		if (get_val(BUTTON_10)) {
+		if (get_val(BUTTON_6)) {
 			combo_run(zoomScopeOut);
 		}
 	}
@@ -159,22 +736,22 @@ main {
 		//printf("YES");
 	}
 	
-	if (checkARfireRate && get_val(BUTTON_5) && system_time() - ARrapidFireTimer > 120) {
-		if (time_active(BUTTON_5) % 100 == 0) {
-			printf("AR FIRE");
-			printf("time: %f", system_time() - ARrapidFireTimer);
-		}
-		ARrapidFireSwitch = TRUE;
+	if (mouse_status(MWHEEL_BACKWARD) < 0 && mapType == "normal") {
+		combo_run(goFirstPerson);
 	}
+}
+
+combo goFirstPerson {
+	set_val(BUTTON_6, 100);
+	wait(500);
+	set_val(BUTTON_6, 0);
 }
 
 combo ARrapidFire {
 	set_val(BUTTON_5, 0);
-	wait(24);
+	wait(17);
 	set_val(BUTTON_5, 100);
-	wait(24);
-	set_val(BUTTON_5, 0);
-	//wait(10);
+	wait(17);
 }
 
 combo zoomScopeIn {
@@ -184,7 +761,6 @@ combo zoomScopeIn {
 }
 
 combo zoomScopeOut {
-	set_val(BUTTON_10, 0);
 	set_val(BUTTON_6, 100);
 	set_val(STICK_2_Y, 100);
 	wait(350);
@@ -200,6 +776,10 @@ combo inventoryState {
 }
 
 combo newAntiRecoil {
+	if (shouldRapidFire && scopeInt < 4) {
+		combo_run(ARrapidFire);
+	}
+	
 	shootingTime = (fix32) time / 1000.0;
 	sensitivityMultiplier = 1.0;
 	
